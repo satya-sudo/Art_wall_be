@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/satya-sudo/Art_wall_be.git/config"
 	"github.com/satya-sudo/Art_wall_be.git/models"
+	"strings"
 )
 
 type InputStruct struct {
@@ -35,15 +36,24 @@ func GetArtPost(c *fiber.Ctx) error {
 }
 
 func GetArtPostsByTag(c *fiber.Ctx) error {
-	tagName := c.Params("tag_name")
-	var tag models.Tag
-	err := config.DB.Preload("Tags").Where("tag_name = ?", tagName).First(&tag).Error
+	tagNames := strings.Split(c.Query("tags"), ",")
+
+	var posts []models.ArtPost
+	err := config.DB.
+		Joins("JOIN art_post_tags ON art_post_tags.art_post_id = art_posts.id").
+		Joins("JOIN tags ON tags.id = art_post_tags.tag_id").
+		Where("tags.name IN ?", tagNames).
+		Preload("Tags").
+		Group("art_posts.id").
+		Find(&posts).Error
+
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"error": "Failed to get tag",
+			"error": "Failed to fetch posts",
 		})
 	}
-	return c.JSON(tag.ArtPosts)
+
+	return c.JSON(posts)
 }
 
 func CreateArtPost(c *fiber.Ctx) error {

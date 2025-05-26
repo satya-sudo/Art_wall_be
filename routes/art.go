@@ -11,7 +11,7 @@ func RegisterArtRoutes(app *fiber.App) {
 
 	posts.Get("/", handlers.GetAllArtPosts)
 	posts.Get("/:id", handlers.GetArtPost)
-	posts.Get("/tags/:tag", handlers.GetArtPostsByTag)
+	posts.Get("/filter/tags", handlers.GetArtPostsByTag)
 
 	// protected routes
 	posts.Post("/", middleware.RequiresAuth, handlers.CreateArtPost)
