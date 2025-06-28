@@ -109,7 +109,10 @@ func UpdateArtPost(c *fiber.Ctx) error {
 	post.Description = input.Description
 	post.ImageURL = input.ImageURL
 	post.Tags = tags
-	config.DB.Model(&post).Association("Tags").Replace(tags)
+	err := config.DB.Model(&post).Association("Tags").Replace(tags)
+	if err != nil {
+		return err
+	}
 
 	if err := config.DB.Save(&post).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{
