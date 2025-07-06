@@ -13,10 +13,8 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// Load .env file only in development
+	_ = godotenv.Load() // Don't fatal — safe fallback
 	port := os.Getenv("PORT")
 	allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
 	app := fiber.New()
